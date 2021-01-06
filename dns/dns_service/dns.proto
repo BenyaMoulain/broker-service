@@ -1,0 +1,59 @@
+syntax = "proto3";
+
+option go_package = "dns/proto";
+
+package dns;
+
+message CreateRequest {
+    string domain_name = 1;
+}
+
+message CreateResponse {
+    repeated int32 vector_clock = 1;
+}
+
+message ReadRequest {
+    string domain_name = 1;
+}
+
+message ReadResponse {
+    string ip = 1;
+    repeated int32 vector_clock = 2;
+}
+
+
+message UpdateRequest {
+    string domain_name = 1;
+}
+
+message UpdateResponse {
+    repeated int32 vector_clock = 1;
+}
+
+
+message DeleteRequest {
+    string domain_name = 1;
+}
+
+message DeleteResponse {
+    repeated int32 vector_clock = 1;
+}
+
+service DNSService {
+    
+    // Create: Responde al comando de un Administrador con el reloj de vector
+    // del registro ZF del dominio que se creó.
+    rpc Create (CreateRequest) returns (CreateResponse) {}
+
+    // Get: Responde el mensaje/comando del cliente con la IP y el reloj de
+    // vector correspondiente.
+    rpc Read (ReadRequest) returns (ReadResponse) {}
+
+    // Update: Responde al comando de un Administrador con el reloj de vector
+    // del registro ZF del dominio que se cambió.
+    rpc Update (UpdateRequest) returns (UpdateResponse) {}
+
+    // Delete: Responde al comando de un Administrador con el reloj de vector
+    // del registro ZF del dominio que se eliminó.
+    rpc Delete (DeleteRequest) returns (DeleteResponse) {}
+}
