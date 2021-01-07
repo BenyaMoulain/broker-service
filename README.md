@@ -19,7 +19,7 @@ make
 
 Ingresar en terminal desde la carpeta broker-service:
 
-./DNS --ip <DIRECCIÓN_IP_DE_ESTE_SERVIDOR>
+./DNS --ip <DIRECCIÓN_IP_DE_ESTE_SERVIDOR> --number <NÚMERO_DEL_SERVIDOR_DNS>
 
 ## Ejecución - Iniciar un Broker
 
