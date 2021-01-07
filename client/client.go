@@ -15,7 +15,7 @@ import (
 )
 
 var (
-	serverAddr = flag.String("server_addr", "localhost:10001", "The server address in the format of host:port")
+	serverAddr = flag.String("broker_addr", "localhost:10001", "The server address in the format of host:port")
 	zfMap      = make(map[string]zfRegister)
 )
 

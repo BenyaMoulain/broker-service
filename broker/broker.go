@@ -32,6 +32,7 @@ var (
 	serverIP2 = flag.String("dns2_ip", "localhost", "Dirección IP del servidor DNS #2")
 	serverIP3 = flag.String("dns3_ip", "localhost", "Dirección IP del servidor DNS #3")
 	dnsPort   = flag.String("dns_port", "10000", "Puerto que usarán los DNS")
+	brokerIP  = flag.String("broker_ip", "localhost", "Dirección IP del broker")
 )
 
 type brokerServiceServer struct {
@@ -141,7 +142,7 @@ func getDNSAddr() string {
 func main() {
 	fmt.Println("Starting server...")
 	flag.Parse()
-	lis, err := net.Listen("tcp", fmt.Sprintf("localhost:%d", *port))
+	lis, err := net.Listen("tcp", fmt.Sprintf("%s:%d", *brokerIP, *port))
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
