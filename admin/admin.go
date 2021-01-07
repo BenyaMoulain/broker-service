@@ -38,6 +38,9 @@ import (
 
 var (
 	brokerAddr = flag.String("broker_addr", "localhost:10001", "The server address in the format of host:port")
+	dns1Addr   = flag.String("dns1_addr", "10.10.28.161:10000", "DNS1 Address")
+	dns2Addr   = flag.String("dns2_addr", "10.10.28.162:10000", "DNS2 Address")
+	dns3Addr   = flag.String("dns3_addr", "10.10.28.163:10000", "DNS3 Address")
 	dnsPort    = flag.String("dns_port", "10000", "Puerto a ser usado por los servidores DNS")
 	zfMap      = make(map[string]zfRegister)
 )
@@ -47,10 +50,11 @@ type zfRegister struct {
 	LastDNS     string
 }
 
-func createDomain(client broker.BrokerServiceClient, domainName string, ip string) {
+func createDomain(client dns.DNSServiceClient, domainName string, ip string, dnsAddr string) {
 	domainNameArray := strings.Split(domainName, ".")
 	// Separa el domain y name
 	domain := domainNameArray[1]
+	dnsIP := strings.Split(dnsAddr, ":")[0]
 
 	req := &dns.CreateRequest{
 		DomainName: domainName,
@@ -58,26 +62,8 @@ func createDomain(client broker.BrokerServiceClient, domainName string, ip strin
 	}
 	log.Printf("Llamada a Create: DomainName: %v, IP: %v", req.GetDomainName(), req.GetIp())
 
-	// Obtiene IP y abre conexión con servidor DNS
-	brokerRes, err := client.GetDNS(context.Background(), &broker.GetDNSRequest{})
-	if err != nil {
-		log.Fatalf("error while calling Greet RPC: %v", err)
-	}
-	dnsIP := brokerRes.GetIp()
-
-	var opts []grpc.DialOption
-
-	opts = append(opts, grpc.WithInsecure())
-	opts = append(opts, grpc.WithBlock())
-	conn, err := grpc.Dial(fmt.Sprintf("%s:%s", dnsIP, *dnsPort), opts...)
-	if err != nil {
-		log.Fatalf("fail to dial: %v", err)
-	}
-	defer conn.Close()
-	dnsClient := dns.NewDNSServiceClient(conn)
-
 	// Envia comando al servidor DNS
-	res, err := dnsClient.Create(context.Background(), req)
+	res, err := client.Create(context.Background(), req)
 	if err != nil {
 		log.Fatalf("error while calling Greet RPC: %v", err)
 	}
@@ -91,9 +77,10 @@ func createDomain(client broker.BrokerServiceClient, domainName string, ip strin
 	log.Printf("Respuesta de Create: %v", vectorClock)
 }
 
-func updateDomain(client broker.BrokerServiceClient, domainName string, option string, parameter string) {
+func updateDomain(client dns.DNSServiceClient, domainName string, option string, parameter string, dnsAddr string) {
 	var boolOption bool
 	domainNameArray := strings.Split(domainName, ".")
+	dnsIP := strings.Split(dnsAddr, ":")[0]
 	// Separa el domain y name
 	domain := domainNameArray[1]
 
@@ -113,25 +100,7 @@ func updateDomain(client broker.BrokerServiceClient, domainName string, option s
 	}
 	log.Printf("Llamada a Update: DomainName: %v, Option: %v, Parameter: %v", req.GetDomainName(), req.GetOption(), req.GetParameter())
 
-	// Obtiene IP y abre conexión con servidor DNS
-	brokerRes, err := client.GetDNS(context.Background(), &broker.GetDNSRequest{})
-	if err != nil {
-		log.Fatalf("error while calling Greet RPC: %v", err)
-	}
-	dnsIP := brokerRes.GetIp()
-
-	var opts []grpc.DialOption
-
-	opts = append(opts, grpc.WithInsecure())
-	opts = append(opts, grpc.WithBlock())
-	conn, err := grpc.Dial(fmt.Sprintf("%s:%s", dnsIP, *dnsPort), opts...)
-	if err != nil {
-		log.Fatalf("fail to dial: %v", err)
-	}
-	defer conn.Close()
-	dnsClient := dns.NewDNSServiceClient(conn)
-
-	res, err := dnsClient.Update(context.Background(), req)
+	res, err := client.Update(context.Background(), req)
 	if err != nil {
 		log.Fatalf("error while calling Greet RPC: %v", err)
 	}
@@ -144,8 +113,9 @@ func updateDomain(client broker.BrokerServiceClient, domainName string, option s
 	log.Printf("Respuesta de Update: %v", vectorClock)
 }
 
-func deleteDomain(client broker.BrokerServiceClient, domainName string) {
+func deleteDomain(client dns.DNSServiceClient, domainName string, dnsAddr string) {
 	domainNameArray := strings.Split(domainName, ".")
+	dnsIP := strings.Split(dnsAddr, ":")[0]
 	// Separa el domain y name
 	domain := domainNameArray[1]
 
@@ -154,25 +124,7 @@ func deleteDomain(client broker.BrokerServiceClient, domainName string) {
 	}
 	log.Printf("Llamada a Delete: DomainName: %v", req.GetDomainName())
 
-	// Obtiene IP y abre conexión con servidor DNS
-	brokerRes, err := client.GetDNS(context.Background(), &broker.GetDNSRequest{})
-	if err != nil {
-		log.Fatalf("error while calling Greet RPC: %v", err)
-	}
-	dnsIP := brokerRes.GetIp()
-
-	var opts []grpc.DialOption
-
-	opts = append(opts, grpc.WithInsecure())
-	opts = append(opts, grpc.WithBlock())
-	conn, err := grpc.Dial(fmt.Sprintf("%s:%s", dnsIP, *dnsPort), opts...)
-	if err != nil {
-		log.Fatalf("fail to dial: %v", err)
-	}
-	defer conn.Close()
-	dnsClient := dns.NewDNSServiceClient(conn)
-
-	res, err := dnsClient.Delete(context.Background(), req)
+	res, err := client.Delete(context.Background(), req)
 	if err != nil {
 		log.Fatalf("error while calling Greet RPC: %v", err)
 	}
@@ -183,6 +135,16 @@ func deleteDomain(client broker.BrokerServiceClient, domainName string) {
 		LastDNS:     dnsIP,
 	}
 	log.Printf("Respuesta de Delete: %v", vectorClock)
+}
+
+func getDNSAddr(client broker.BrokerServiceClient) string {
+	// Obtiene IP y abre conexión con servidor DNS
+	brokerRes, err := client.GetDNS(context.Background(), &broker.GetDNSRequest{})
+	if err != nil {
+		log.Fatalf("error while calling Greet RPC: %v", err)
+	}
+	dnsIP := brokerRes.GetIp()
+	return fmt.Sprintf("%s:%s", dnsIP, *dnsPort)
 }
 
 func showCommands() {
@@ -208,6 +170,26 @@ func main() {
 	defer conn.Close()
 	client := broker.NewBrokerServiceClient(conn)
 
+	dns1Conn, err := grpc.Dial(*dns1Addr, opts...)
+	if err != nil {
+		log.Fatalf("fail to dial: %v", err)
+	}
+	dns2Conn, err := grpc.Dial(*dns2Addr, opts...)
+	if err != nil {
+		log.Fatalf("fail to dial: %v", err)
+	}
+	dns3Conn, err := grpc.Dial(*dns3Addr, opts...)
+	if err != nil {
+		log.Fatalf("fail to dial: %v", err)
+	}
+	defer dns1Conn.Close()
+	defer dns2Conn.Close()
+	defer dns3Conn.Close()
+
+	dns1Client := dns.NewDNSServiceClient(dns1Conn)
+	dns2Client := dns.NewDNSServiceClient(dns2Conn)
+	dns3Client := dns.NewDNSServiceClient(dns3Conn)
+
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Println("Bienvenido")
 	showCommands()
@@ -216,7 +198,6 @@ func main() {
 	for {
 		fmt.Print("-> ")
 		text, _ := reader.ReadString('\n')
-		text = strings.Replace(text, "\n", "", -1)
 		text = strings.ToLower(text[0 : len(text)-1])
 		splitedString := strings.Split(text, " ")
 		length := len(splitedString)
@@ -231,12 +212,22 @@ func main() {
 			if length >= 2 && length <= 4 {
 				action := splitedString[0]
 				domainName := splitedString[1]
+				dnsAddr := getDNSAddr(client)
+				dnsClient := dns1Client
+				if dnsAddr == *dns1Addr {
+					dnsClient = dns1Client
+				} else if dnsAddr == *dns2Addr {
+					dnsClient = dns2Client
+				} else if dnsAddr == *dns3Addr {
+					dnsClient = dns3Client
+				}
 				if action == "create" {
 					if length < 3 {
 						fmt.Println("No ingresó los argumentos necesarios para ejecutar el comando create. Ingrese help para más información.")
 					} else {
 						IP := splitedString[2]
-						createDomain(client, domainName, IP)
+
+						createDomain(dnsClient, domainName, IP, dnsAddr)
 					}
 				} else if action == "update" {
 					if length < 4 {
@@ -244,10 +235,10 @@ func main() {
 					} else {
 						option := splitedString[2]
 						parameter := splitedString[3]
-						updateDomain(client, domainName, option, parameter)
+						updateDomain(dnsClient, domainName, option, parameter, dnsAddr)
 					}
 				} else if action == "delete" {
-					deleteDomain(client, domainName)
+					deleteDomain(dnsClient, domainName, dnsAddr)
 				} else {
 					fmt.Println("El comando ingresado es invalido, porfavor ingrese help para ver los comandos disponibles.")
 				}
