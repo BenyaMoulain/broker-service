@@ -359,7 +359,7 @@ func main() {
 
 	fmt.Println("Iniciando servidor...")
 	flag.Parse()
-	lis, err := net.Listen("tcp", fmt.Sprintf("localhost:%d", *port))
+	lis, err := net.Listen("tcp", fmt.Sprintf("%s:%d", *serverIP, *port))
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
