@@ -74,7 +74,7 @@ func (s *dNSServiceServer) Read(ctx context.Context, req *dns.ReadRequest) (*dns
 	output := strings.Join(lines, "\n")
 	err = ioutil.WriteFile(zfPath, []byte(output), 0644)
 	if err != nil {
-		log.Fatalln(err)
+		log.Println(err)
 	}
 	res := &dns.ReadResponse{
 		Ip:          ip,
@@ -222,7 +222,7 @@ func writeFile(domain string, name string, ip string, action string) {
 	defer zfFile.Close()
 	newZFLine := fmt.Sprintf("www.%s.%s IN A %s \n", name, domain, ip)
 	if _, err := zfFile.WriteString(newZFLine); err != nil {
-		log.Fatal(err)
+		log.PrintFatal(err)
 	}
 
 	// Escribe en el log
