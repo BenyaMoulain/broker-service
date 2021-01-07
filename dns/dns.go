@@ -222,7 +222,7 @@ func writeFile(domain string, name string, ip string, action string) {
 	defer zfFile.Close()
 	newZFLine := fmt.Sprintf("www.%s.%s IN A %s \n", name, domain, ip)
 	if _, err := zfFile.WriteString(newZFLine); err != nil {
-		log.PrintFatal(err)
+		log.Println(err)
 	}
 
 	// Escribe en el log
@@ -233,7 +233,7 @@ func writeFile(domain string, name string, ip string, action string) {
 	defer logFile.Close()
 	newLogLine := fmt.Sprintf("%s %s.%s %s \n", action, name, domain, ip)
 	if _, err := logFile.WriteString(newLogLine); err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 }
 
@@ -278,7 +278,7 @@ func updateFile(domain string, name string, option bool, parameter string, actio
 	output := strings.Join(lines, "\n")
 	err = ioutil.WriteFile(zfPath, []byte(output), 0644)
 	if err != nil {
-		log.Fatalln(err)
+		log.Println(err)
 	}
 
 	if found == false {
@@ -293,7 +293,7 @@ func updateFile(domain string, name string, option bool, parameter string, actio
 	defer logFile.Close()
 	newLogLine := fmt.Sprintf("%s %s.%s %s \n", action, name, domain, parameter)
 	if _, err := logFile.WriteString(newLogLine); err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 
 	return true
@@ -329,7 +329,7 @@ func deleteFile(domain string, name string, action string) bool {
 	output := strings.Join(lines, "\n")
 	err = ioutil.WriteFile(zfPath, []byte(output), 0644)
 	if err != nil {
-		log.Fatalln(err)
+		log.Println(err)
 	}
 	if found == false {
 		return false
@@ -343,7 +343,7 @@ func deleteFile(domain string, name string, action string) bool {
 	defer logFile.Close()
 	newLogLine := fmt.Sprintf("%s %s.%s \n", action, name, domain)
 	if _, err := logFile.WriteString(newLogLine); err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	return true
 }
