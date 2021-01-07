@@ -139,13 +139,14 @@ func (s *dNSServiceServer) Update(ctx context.Context, req *dns.UpdateRequest) (
 	// Crea el directorio del dominio
 	// Crea archivos del registro ZF y log
 	// Escribe en el registro ZF y en el log del dominio
-	zfMap[domain].FileMutex.Lock()
-	defer zfMap[domain].FileMutex.Unlock()
+
 	found := updateFile(domain, name, option, parameter, "update")
 	if found == true {
 		// Guarda el reloj vector en memoria
 		var ok bool
 		if _, ok = zfMap[domain]; ok {
+			zfMap[domain].FileMutex.Lock()
+			defer zfMap[domain].FileMutex.Unlock()
 			zfMap[domain].VectorClock[*serverNumber-1]++
 		} else {
 			os.RemoveAll(dirPath)
