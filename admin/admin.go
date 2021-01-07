@@ -216,7 +216,6 @@ func main() {
 	for {
 		fmt.Print("-> ")
 		text, _ := reader.ReadString('\n')
-		text = strings.Replace(text, "\n", "", -1)
 		text = strings.ToLower(text[0 : len(text)-1])
 		splitedString := strings.Split(text, " ")
 		length := len(splitedString)
