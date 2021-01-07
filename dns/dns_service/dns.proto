@@ -6,6 +6,7 @@ package dns;
 
 message CreateRequest {
     string domain_name = 1;
+    string ip = 2;
 }
 
 message CreateResponse {
@@ -24,6 +25,8 @@ message ReadResponse {
 
 message UpdateRequest {
     string domain_name = 1;
+    bool option = 2;
+    string parameter = 3;
 }
 
 message UpdateResponse {

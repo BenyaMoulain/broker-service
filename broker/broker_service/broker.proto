@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+option go_package = "broker/proto";
+
+package broker;
+
+message ReadRequest {
+    string domain_name = 1;
+}
+
+message ReadResponse {
+    string ip = 1;
+    repeated int32 vector_clock = 2;
+    string dns_ip = 3;
+}
+
+message ReadConflictRequest {
+    string domain_name = 1;
+    string dns_ip = 2;
+}
+
+message ReadConflictResponse {
+    string ip = 1;
+    repeated int32 vector_clock = 2;
+    string dns_ip = 3;
+}
+
+
+message GetDNSRequest {}
+
+message GetDNSResponse {
+    string ip = 1;
+}
+
+service BrokerService {
+
+    // Responde el mensaje/comando del cliente con la IP y el reloj de
+    // vector correspondiente.
+    rpc Read (ReadRequest) returns (ReadResponse) {}
+
+    // Responde al admin con una IP elegida de forma aleatoria
+    rpc GetDNS (GetDNSRequest) returns (GetDNSResponse) {}
+
+    // En caso de conflicto lee en un servidor DNS específico
+    rpc ReadConflict (ReadConflictRequest) returns (ReadConflictResponse) {}
+}
