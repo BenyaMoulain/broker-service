@@ -68,6 +68,7 @@ func createDomain(client broker.BrokerServiceClient, domainName string, ip strin
 	var opts []grpc.DialOption
 
 	opts = append(opts, grpc.WithInsecure())
+	opts = append(opts, grpc.WithBlock())
 	conn, err := grpc.Dial(fmt.Sprintf("%s:%s", dnsIP, *dnsPort), opts...)
 	if err != nil {
 		log.Fatalf("fail to dial: %v", err)
@@ -122,6 +123,7 @@ func updateDomain(client broker.BrokerServiceClient, domainName string, option s
 	var opts []grpc.DialOption
 
 	opts = append(opts, grpc.WithInsecure())
+	opts = append(opts, grpc.WithBlock())
 	conn, err := grpc.Dial(fmt.Sprintf("%s:%s", dnsIP, *dnsPort), opts...)
 	if err != nil {
 		log.Fatalf("fail to dial: %v", err)
@@ -162,6 +164,7 @@ func deleteDomain(client broker.BrokerServiceClient, domainName string) {
 	var opts []grpc.DialOption
 
 	opts = append(opts, grpc.WithInsecure())
+	opts = append(opts, grpc.WithBlock())
 	conn, err := grpc.Dial(fmt.Sprintf("%s:%s", dnsIP, *dnsPort), opts...)
 	if err != nil {
 		log.Fatalf("fail to dial: %v", err)
@@ -197,6 +200,7 @@ func main() {
 	var opts []grpc.DialOption
 
 	opts = append(opts, grpc.WithInsecure())
+	opts = append(opts, grpc.WithBlock())
 	conn, err := grpc.Dial(*brokerAddr, opts...)
 	if err != nil {
 		log.Fatalf("fail to dial: %v", err)

@@ -61,6 +61,7 @@ func (s *brokerServiceServer) Read(ctx context.Context, req *broker.ReadRequest)
 	var opts []grpc.DialOption
 
 	opts = append(opts, grpc.WithInsecure())
+	opts = append(opts, grpc.WithBlock())
 	conn, err := grpc.Dial(dnsAddr, opts...)
 	if err != nil {
 		log.Fatalf("fail to dial: %v", err)
@@ -100,6 +101,7 @@ func (s *brokerServiceServer) ReadConflict(ctx context.Context, req *broker.Read
 	var opts []grpc.DialOption
 
 	opts = append(opts, grpc.WithInsecure())
+	opts = append(opts, grpc.WithBlock())
 	conn, err := grpc.Dial(dnsAddr, opts...)
 	if err != nil {
 		log.Fatalf("fail to dial: %v", err)
