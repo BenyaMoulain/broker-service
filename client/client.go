@@ -66,7 +66,11 @@ func getDomain(client broker.BrokerServiceClient, domainName string) {
 
 // Compara los relojes de vector para saber si aplicar Monotonic Reads
 func compareVectorClocks(oldVectorClock []int32, newVectorClock []int32) bool {
+	newClockLength := len(newVectorClock)
 	for index, clock := range oldVectorClock {
+		if newClockLength-1 < index {
+			return true
+		}
 		if newVectorClock[index] < clock {
 			return true
 		}
